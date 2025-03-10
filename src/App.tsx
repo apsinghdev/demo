@@ -27,6 +27,7 @@ const App = () => {
     clicks: [clicks],
     image: [, setImage],
     maskImg: [, setMaskImg],
+    maskImg: [maskImg],
   } = useContext(AppContext)!;
   const [model, setModel] = useState<InferenceSession | null>(null); // ONNX model
   const [tensor, setTensor] = useState<Tensor | null>(null); // Image embedding tensor
@@ -126,7 +127,35 @@ const App = () => {
     }
   };
 
-  return <Stage />;
+  const downloadMaskImage = () => {
+    if (!maskImg) return;
+  
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+  
+    if (!ctx) return;
+  
+    canvas.width = maskImg.width;
+    canvas.height = maskImg.height;
+    ctx.drawImage(maskImg, 0, 0);
+  
+    // Convert canvas to blob and trigger download
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "mask-image.png"; // Set filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }, "image/png");
+  };
+  
+
+  return <>
+  <Stage />
+  <button onClick={downloadMaskImage}>Download Mask Image</button>
+  </>
 };
 
 export default App;
